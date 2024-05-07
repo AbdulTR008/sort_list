@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sortlist/sample_data.dart';
+import 'package:intl/intl.dart';
 
 import 'model.dart';
 
@@ -15,26 +16,50 @@ class _ListScreenState extends State<ListScreen> {
 
   List<CustomerData> sortedList = [];
 
-  sortList({location}) {
-    var dummyLocationList = [];
-    String? searchInLowerText = textController?.text.toLowerCase();
-    print(searchInLowerText.runtimeType);
-    if (searchInLowerText != null && searchInLowerText != '') {
-      
-      dummyLocationList = sampleUserData.where((element) {
-        return searchInLowerText == element.location.toLowerCase();
-      }).toList();
-      sampleUserData = dummyLocationList as List<CustomerData>;
-    } else {
-      return sampleUserData;
-    }
+  // sortList({location}) {
+  //   var dummyLocationList = [];
+  //   String? searchInLowerText = textController?.text.toLowerCase();
+  //   print(searchInLowerText.runtimeType);
+  //   if (searchInLowerText != null && searchInLowerText != '') {
+  //     dummyLocationList = sampleUserData.where((element) {
+  //       return searchInLowerText == element.location.toLowerCase();
+  //     }).toList();
+  //     sampleUserData = dummyLocationList as List<CustomerData>;
+  //   } else {
+  //     return sampleUserData;
+  //   }
 
+  //   setState(() {});
+  // }
+
+  /////////////////////////////////////
+  ///
+  ///
+
+  // Import the intl package
+
+  void sortList(List<CustomerData> list, String? currentLocation) {
+    list.sort((a, b) {
+      DateTime dateTimeA = DateFormat('d-MMM-yyyy').parse(a.dateTime);
+      DateTime dateTimeB = DateFormat('d-MMM-yyyy').parse(b.dateTime);
+
+      if (a.location.toLowerCase() == currentLocation &&
+          b.location.toLowerCase() != currentLocation) {
+        return -1;
+      } else if (b.location.toLowerCase() == currentLocation &&
+          a.location.toLowerCase() != currentLocation) {
+        return 1;
+      } else {
+        if (dateTimeA.hour == dateTimeB.hour) {
+          return b.frequency.compareTo(a.frequency);
+        } else {
+          return dateTimeA.hour.compareTo(dateTimeB.hour);
+        }
+      }
+    });
     setState(() {});
   }
 
-  /////////////////////////////////////
-
-  ///
   String getDateCategory(String dateTime) {
     int day = int.parse(dateTime.split('-')[0]);
     if (day <= 10) {
@@ -46,7 +71,6 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-////////////////////////////////
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +86,10 @@ class _ListScreenState extends State<ListScreen> {
               controller: textController,
             ),
           ),
-          ElevatedButton(onPressed: sortList, child: const Text('Search')),
+          ElevatedButton(
+              onPressed: () =>
+                  sortList(sampleUserData, textController?.text.toLowerCase()),
+              child: const Text('Search')),
           Expanded(
             child: ListView.builder(
                 itemCount: sampleUserData.length,
