@@ -13,35 +13,19 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   TextEditingController? textController = TextEditingController();
+  TextEditingController? dateController = TextEditingController();
 
   List<CustomerData> sortedList = [];
 
-  // sortList({location}) {
-  //   var dummyLocationList = [];
-  //   String? searchInLowerText = textController?.text.toLowerCase();
-  //   print(searchInLowerText.runtimeType);
-  //   if (searchInLowerText != null && searchInLowerText != '') {
-  //     dummyLocationList = sampleUserData.where((element) {
-  //       return searchInLowerText == element.location.toLowerCase();
-  //     }).toList();
-  //     sampleUserData = dummyLocationList as List<CustomerData>;
-  //   } else {
-  //     return sampleUserData;
-  //   }
-
-  //   setState(() {});
-  // }
-
-  /////////////////////////////////////
-  ///
-  ///
-
-  // Import the intl package
-
-  void sortList(List<CustomerData> list, String? currentLocation) {
+  void sortList(
+      List<CustomerData> list, String? currentLocation, int currentDate) {
     list.sort((a, b) {
       DateTime dateTimeA = DateFormat('d-MMM-yyyy').parse(a.dateTime);
       DateTime dateTimeB = DateFormat('d-MMM-yyyy').parse(b.dateTime);
+
+      int dateCategoryA = getDateCategory(dateTimeA.day);
+      int dateCategoryB = getDateCategory(dateTimeB.day);
+      int currentDateCategory = getDateCategory(currentDate);
 
       if (a.location.toLowerCase() == currentLocation &&
           b.location.toLowerCase() != currentLocation) {
@@ -50,48 +34,79 @@ class _ListScreenState extends State<ListScreen> {
           a.location.toLowerCase() != currentLocation) {
         return 1;
       } else {
-        if (dateTimeA.hour == dateTimeB.hour) {
-          return b.frequency.compareTo(a.frequency);
+        if (dateCategoryA == currentDateCategory &&
+            dateCategoryB != currentDateCategory) {
+          return -1;
+        } else if (dateCategoryB == currentDateCategory &&
+            dateCategoryA != currentDateCategory) {
+          return 1;
         } else {
-          return dateTimeA.hour.compareTo(dateTimeB.hour);
+          if (dateTimeA.hour == dateTimeB.hour) {
+            return b.frequency.compareTo(a.frequency);
+          } else {
+            return dateTimeA.hour.compareTo(dateTimeB.hour);
+          }
         }
       }
     });
     setState(() {});
   }
 
-  String getDateCategory(String dateTime) {
-    int day = int.parse(dateTime.split('-')[0]);
+  int getDateCategory(int day) {
     if (day <= 10) {
-      return '1-10';
+      return 1;
     } else if (day <= 20) {
-      return '11-20';
+      return 2;
     } else {
-      return '21-30';
+      return 3;
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+
+  
+
     return Scaffold(
-      backgroundColor: Color.fromARGB(255, 169, 190, 200),
+      appBar: AppBar(
+        title: const Text('List Sort'),
+      ),
+      backgroundColor: const Color.fromARGB(255, 169, 190, 200),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: InputDecoration(
+              
+              decoration: const InputDecoration(
+                  helperText: 'city',
                   border: OutlineInputBorder(),
                   disabledBorder: OutlineInputBorder()),
               controller: textController,
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              decoration: const InputDecoration(
+                  helperText: 'date',
+                  border: OutlineInputBorder(),
+                  disabledBorder: OutlineInputBorder()),
+              controller: dateController,
+            ),
+          ),
           ElevatedButton(
               onPressed: () =>
-                  sortList(sampleUserData, textController?.text.toLowerCase()),
+                  sortList(
+                  sampleUserData,
+                  textController?.text.toLowerCase(),
+                  int.parse(dateController!.text.toString())),
               child: const Text('Search')),
           Expanded(
             child: ListView.builder(
+                padding: const EdgeInsets.all(8),
                 itemCount: sampleUserData.length,
                 itemBuilder: (context, index) {
                   return Card(
@@ -100,10 +115,11 @@ class _ListScreenState extends State<ListScreen> {
                       subtitle: Row(
                         children: [
                           Text(sampleUserData[index].receiverName),
-                          SizedBox(
+                          const SizedBox(
                             width: 20,
                           ),
-                          Text(sampleUserData[index].frequency.toString()),
+                          Text(
+                              'Rate ${sampleUserData[index].frequency.toString()}'),
                         ],
                       ),
                       trailing: Column(
@@ -126,7 +142,7 @@ class _ListScreenState extends State<ListScreen> {
 
 
 
-// sortGpt() {
+// sort() {
 //   sampleUserData.sort((a, b) {
 //     // String dateCategoryA = getDateCategory('25-4-2024');
 //     // String dateCategoryB = getDateCategory('29-2-2024');
@@ -144,3 +160,37 @@ class _ListScreenState extends State<ListScreen> {
 //   }
 //   setState(() {});
 // }
+
+
+
+  // void sortList(List<CustomerData> list, String? currentLocation) {
+  //   list.sort((a, b) {
+  //     DateTime dateTimeA = DateFormat('d-MMM-yyyy').parse(a.dateTime);
+  //     DateTime dateTimeB = DateFormat('d-MMM-yyyy').parse(b.dateTime);
+
+  //     if (a.location.toLowerCase() == currentLocation &&
+  //         b.location.toLowerCase() != currentLocation) {
+  //       return -1;
+  //     } else if (b.location.toLowerCase() == currentLocation &&
+  //         a.location.toLowerCase() != currentLocation) {
+  //       return 1;
+  //     } else {
+  //       if (dateTimeA.hour == dateTimeB.hour) {
+  //         return b.frequency.compareTo(a.frequency);
+  //       } else {
+  //         return dateTimeA.hour.compareTo(dateTimeB.hour);
+  //       }
+  //     }
+  //   });
+  //   final numbers = <String>['one', 'twoss', 'threeeee', '5', 'fourrr'];
+  //   numbers.sort((a, b) {
+  //     print('A $a');
+  //     print('B $b');
+
+  //     print(' First  ${a.length.compareTo(b.length)}');
+  //     return a.length.compareTo(b.length);
+  //   });
+
+  //   print({numbers});
+  //   setState(() {});
+  // }
